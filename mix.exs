@@ -34,6 +34,7 @@ defmodule Blog.MixProject do
   defp deps do
     [
       {:guardian, "~> 2.0"},
+      {:argon2_elixir, "~> 2.0"},
       {:phoenix, "~> 1.5.7"},
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.4"},
