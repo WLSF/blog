@@ -12,4 +12,3 @@ defmodule Blog.Repo.Migrations.CreateUsers do
     end
   end
 end
-

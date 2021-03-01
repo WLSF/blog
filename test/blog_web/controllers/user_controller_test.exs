@@ -2,14 +2,14 @@ defmodule BlogWeb.UserControllerTest do
   use BlogWeb.ConnCase
 
   alias Blog.Accounts
-  alias Blog.Accounts.User
 
   @create_attrs %{
-
+    display_name: "John Doe",
+    email: "john@doe.com",
+    image: "s3_image.jpg",
+    password: "anythingsecret"
   }
-  @update_attrs %{
 
-  }
   @invalid_attrs %{}
 
   def fixture(:user) do
@@ -36,32 +36,12 @@ defmodule BlogWeb.UserControllerTest do
       conn = get(conn, Routes.user_path(conn, :show, id))
 
       assert %{
-               "id" => id
+               "id" => _id
              } = json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
-
-  describe "update user" do
-    setup [:create_user]
-
-    test "renders user when data is valid", %{conn: conn, user: %User{id: id} = user} do
-      conn = put(conn, Routes.user_path(conn, :update, user), user: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
-
-      conn = get(conn, Routes.user_path(conn, :show, id))
-
-      assert %{
-               "id" => id
-             } = json_response(conn, 200)["data"]
-    end
-
-    test "renders errors when data is invalid", %{conn: conn, user: user} do
-      conn = put(conn, Routes.user_path(conn, :update, user), user: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end

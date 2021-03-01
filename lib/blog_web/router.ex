@@ -11,8 +11,11 @@ defmodule BlogWeb.Router do
   end
 
   scope "/api", BlogWeb do
-    pipe_through :api
+    pipe_through [:api, :authenticated]
 
-    resources "/users", UserController
+    post "/user", UserController, :create
+    get "/user", UserController, :index
+    get "/user/:id", UserController, :show
+    delete "/user/:id", UserController, :delete
   end
 end
