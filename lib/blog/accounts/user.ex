@@ -3,6 +3,7 @@ defmodule Blog.Accounts.User do
   import Ecto.Changeset
 
   alias Argon2
+  alias Blog.Accounts.Validators, as: Validate
 
   @derive {Jason.Encoder, [:display_name, :email, :image]}
 
@@ -23,19 +24,13 @@ defmodule Blog.Accounts.User do
     user
     |> cast(attrs, @fields ++ [:password_hash])
     |> validate_required(@fields)
-    |> put_password_hash()
+    |> Validate.display_name()
+    |> Validate.email()
+    |> Validate.password()
   end
 
   def changeset(user, attrs) do
     user
     |> cast(attrs, @fields)
   end
-
-  defp put_password_hash(
-         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
-       ) do
-    change(changeset, password_hash: Argon2.hash_pwd_salt(password))
-  end
-
-  defp put_password_hash(changeset), do: changeset
 end

@@ -13,7 +13,12 @@ defmodule Blog.AccountsTest do
       password: "anythingsecure"
     }
 
-    @invalid_attrs %{}
+    @invalid_attrs %{
+      display_name: "123",
+      email: "wrong_email",
+      image: "",
+      password: "small"
+    }
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
