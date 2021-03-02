@@ -27,4 +27,4 @@ blog-*.tar
 # this depending on your deployment strategy.
 /priv/static/
 
-db-data
+.db-data

@@ -30,6 +30,8 @@ config :blog, Blog.Guardian,
   issuer: "blog",
   secret_key: "6TITixyl2J0hYtfawRTLerGlM4X03C9Y9H5KMZQtyozZb76NYEA57u7dkJPzmSr8"
 
+config :guardian, Guardian.DB, repo: Blog.Repo, schema_name: "guardian_tokens", sweep_interval: 60
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

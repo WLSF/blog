@@ -126,7 +126,6 @@ defmodule BlogWeb.PostControllerTest do
     end
   end
 
-
   describe "delete post" do
     setup [:create_post, :auth_user]
 

@@ -129,5 +129,5 @@ defmodule Blog.Topics do
     Map.put(attrs, :user_id, user.id)
   end
 
-  defp mix_args(_, %{} = attrs), do: attrs
+  defp mix_args(user, %{}), do: %{user_id: user.id}
 end

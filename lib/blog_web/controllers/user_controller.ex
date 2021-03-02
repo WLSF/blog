@@ -31,7 +31,12 @@ defmodule BlogWeb.UserController do
     with {:ok, %User{} = user} <- Guardian.Plug.current_resource(conn),
          {:ok, %User{} = user} <- Accounts.get_user!(user.id),
          {:ok, %User{}} <- Accounts.delete_user(user) do
-      send_resp(conn, :no_content, "")
+      token = Guardian.Plug.current_token(conn)
+      Guardian.revoke(token)
+
+      conn
+      |> Guardian.Plug.sign_out()
+      |> send_resp(:no_content, "")
     end
   end
 end
