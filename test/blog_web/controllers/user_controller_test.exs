@@ -22,9 +22,11 @@ defmodule BlogWeb.UserControllerTest do
   end
 
   describe "index" do
+    setup [:create_user, :auth_user]
+
     test "lists all users", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+      assert [%{"display_name" => _}] = json_response(conn, 200)["data"]
     end
   end
 
@@ -48,7 +50,7 @@ defmodule BlogWeb.UserControllerTest do
   end
 
   describe "delete user" do
-    setup [:create_user]
+    setup [:create_user, :auth_user]
 
     test "deletes chosen user", %{conn: conn, user: user} do
       conn = delete(conn, Routes.user_path(conn, :delete, user))
@@ -63,5 +65,11 @@ defmodule BlogWeb.UserControllerTest do
   defp create_user(_) do
     user = fixture(:user)
     %{user: user}
+  end
+
+  defp auth_user(%{conn: conn, user: user}) do
+    {:ok, token, _} = Blog.Guardian.encode_and_sign(user)
+    conn = put_req_header(conn, "authorization", "Bearer #{token}")
+    %{conn: conn}
   end
 end
