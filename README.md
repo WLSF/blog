@@ -17,6 +17,10 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
+## Up and running
+
+The insomnia-guide.json file contains all the REST API configs for Insomnia workspace, use it for the tests.
+
 ## Learn more
 
   * Official website: https://www.phoenixframework.org/
