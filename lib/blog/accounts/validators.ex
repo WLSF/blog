@@ -26,7 +26,7 @@ defmodule Blog.Accounts.Validators do
   def email(changeset) do
     changeset
     |> unique_constraint(:email)
-    |> validate_format(:email, ~r/[A-Za-z._]+@[A-Za-z]+(.(com|br))+/)
+    |> validate_format(:email, ~r/[A-Za-z0-9._]+@[A-Za-z]+(.(com|br))+/)
   end
 
   # =================================
