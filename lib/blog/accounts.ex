@@ -91,19 +91,6 @@ defmodule Blog.Accounts do
     Repo.delete(user)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
-
-  ## Examples
-
-      iex> change_user(user)
-      %Ecto.Changeset{data: %User{}}
-
-  """
-  def change_user(%User{} = user, attrs \\ %{}) do
-    User.changeset(user, attrs)
-  end
-
   defp do_auth_user(%{"email" => email, "password" => password}) do
     User
     |> Repo.get_by!(email: email)
