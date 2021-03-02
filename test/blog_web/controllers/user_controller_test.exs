@@ -80,7 +80,7 @@ defmodule BlogWeb.UserControllerTest do
       assert response(conn, 204)
 
       conn = get(conn, Routes.user_path(conn, :show, user))
-      assert %{"message" => "Not Found"} = json_response(conn, 404)["errors"]
+      assert response(conn, 404)
     end
   end
 
