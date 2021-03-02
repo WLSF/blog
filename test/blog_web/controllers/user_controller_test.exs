@@ -31,18 +31,19 @@ defmodule BlogWeb.UserControllerTest do
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = get(conn, Routes.user_path(conn, :show, id))
-
-      assert %{
-               "id" => _id
-             } = json_response(conn, 200)["data"]
+      assert %{"token" => _} = json_response(conn, 201)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+      assert json_response(conn, 400)["errors"] != %{}
+    end
+
+    test "renders already exists error when duplicated user", %{conn: conn} do
+      post(conn, Routes.user_path(conn, :create), user: @create_attrs)
+      conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
+
+      assert %{"email" => ["has already been taken"]} = json_response(conn, 409)["errors"]
     end
   end
 

@@ -4,8 +4,8 @@ defmodule Blog.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias Blog.Repo
 
+  alias Blog.Repo
   alias Blog.Accounts.User
 
   @doc """
@@ -53,6 +53,29 @@ defmodule Blog.Accounts do
     %User{}
     |> User.signup_changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Authenticates the User with email and password.
+
+  ## Examples
+
+      iex> auth_user(%{email: _, password: _})
+      {:ok, %User{}}
+  """
+  def auth_user(%{"email" => email, "password" => password}) do
+    User
+    |> Repo.get_by!(email: email)
+    |> User.check_password(password)
+    |> case do
+      false ->
+        {:error, :invalid_credentials}
+
+      user ->
+        {:ok, user}
+    end
+  rescue
+    Ecto.No.NoResultsError -> {:error, :invalid_credentials}
   end
 
   @doc """
