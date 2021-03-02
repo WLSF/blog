@@ -3,6 +3,7 @@ defmodule Blog.Accounts.User do
   import Ecto.Changeset
 
   alias Argon2
+  alias Blog.Accounts.Validators, as: Validate
 
   @derive {Jason.Encoder, [:display_name, :email, :image]}
 
@@ -16,26 +17,36 @@ defmodule Blog.Accounts.User do
     timestamps()
   end
 
-  @fields ~w(display_name email image password)a
+  @signup_fields ~w(display_name email image password)a
+  @login_fields ~w(email password)a
 
   @doc false
   def signup_changeset(user, attrs) do
     user
-    |> cast(attrs, @fields ++ [:password_hash])
-    |> validate_required(@fields)
-    |> put_password_hash()
+    |> cast(attrs, @signup_fields ++ [:password_hash])
+    |> validate_required(@signup_fields)
+    |> Validate.display_name()
+    |> Validate.email()
+    |> Validate.password()
+  end
+
+  def login_changeset(attrs) do
+    %__MODULE__{}
+    |> cast(attrs, @login_fields)
+    |> validate_required(@login_fields)
   end
 
   def changeset(user, attrs) do
     user
-    |> cast(attrs, @fields)
+    |> cast(attrs, @signup_fields)
   end
 
-  defp put_password_hash(
-         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
-       ) do
-    change(changeset, password_hash: Argon2.hash_pwd_salt(password))
+  @spec check_password(User.t(), String.t()) :: User.t() | false
+  def check_password(user, password) do
+    if Argon2.verify_pass(password, user.password_hash) do
+      user
+    else
+      false
+    end
   end
-
-  defp put_password_hash(changeset), do: changeset
 end

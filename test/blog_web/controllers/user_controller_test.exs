@@ -22,45 +22,85 @@ defmodule BlogWeb.UserControllerTest do
   end
 
   describe "index" do
+    setup [:create_user, :auth_user]
+
     test "lists all users", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+      assert [%{"display_name" => _}] = json_response(conn, 200)["data"]
+    end
+  end
+
+  describe "index without auth" do
+    setup [:create_user]
+
+    test "renders error", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :index))
+      assert %{"message" => "unauthenticated"} = json_response(conn, 401)["errors"]
+    end
+  end
+
+  describe "show user" do
+    setup [:create_user, :auth_user]
+
+    test "renders user by id", %{conn: conn, user: user} do
+      conn = get(conn, Routes.user_path(conn, :show, user.id))
+      assert %{"display_name" => _} = json_response(conn, 200)["data"]
+    end
+
+    test "renders 404 when user doesnt exist", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :show, 1_231_234))
+      assert %{"message" => "Not Found"} = json_response(conn, 404)["errors"]
     end
   end
 
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = get(conn, Routes.user_path(conn, :show, id))
-
-      assert %{
-               "id" => _id
-             } = json_response(conn, 200)["data"]
+      assert %{"token" => _} = json_response(conn, 201)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+      assert json_response(conn, 400)["errors"] != %{}
+    end
+
+    test "renders already exists error when duplicated user", %{conn: conn} do
+      post(conn, Routes.user_path(conn, :create), user: @create_attrs)
+      conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
+
+      assert %{"email" => ["has already been taken"]} = json_response(conn, 409)["errors"]
     end
   end
 
   describe "delete user" do
-    setup [:create_user]
+    setup [:create_user, :auth_user]
 
     test "deletes chosen user", %{conn: conn, user: user} do
-      conn = delete(conn, Routes.user_path(conn, :delete, user))
+      conn = delete(conn, Routes.user_path(conn, :delete))
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, Routes.user_path(conn, :show, user))
-      end
+      conn = get(conn, Routes.user_path(conn, :show, user))
+      assert %{"message" => "Not Found"} = json_response(conn, 404)["errors"]
+    end
+  end
+
+  describe "delete user without auth" do
+    setup [:create_user]
+
+    test "renders error", %{conn: conn} do
+      conn = delete(conn, Routes.user_path(conn, :delete))
+      assert %{"message" => "unauthenticated"} = json_response(conn, 401)["errors"]
     end
   end
 
   defp create_user(_) do
     user = fixture(:user)
     %{user: user}
+  end
+
+  defp auth_user(%{conn: conn, user: user}) do
+    {:ok, token, _} = Blog.Guardian.encode_and_sign(user)
+    conn = put_req_header(conn, "authorization", "Bearer #{token}")
+    %{conn: conn}
   end
 end

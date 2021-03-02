@@ -4,8 +4,8 @@ defmodule Blog.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias Blog.Repo
 
+  alias Blog.Repo
   alias Blog.Accounts.User
 
   @doc """
@@ -35,7 +35,11 @@ defmodule Blog.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    {:ok, Repo.get!(User, id)}
+  rescue
+    Ecto.NoResultsError -> {:error, :not_found}
+  end
 
   @doc """
   Creates a user.
@@ -56,6 +60,26 @@ defmodule Blog.Accounts do
   end
 
   @doc """
+  Authenticates the User with email and password.
+
+  ## Examples
+
+      iex> auth_user(%{email: _, password: _})
+      {:ok, %User{}}
+  """
+  def auth_user(params) do
+    params
+    |> User.login_changeset()
+    |> case do
+      %Ecto.Changeset{valid?: true} ->
+        do_auth_user(params)
+
+      e ->
+        {:error, e}
+    end
+  end
+
+  @doc """
   Deletes a user.
 
   ## Examples
@@ -71,16 +95,18 @@ defmodule Blog.Accounts do
     Repo.delete(user)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
+  defp do_auth_user(%{"email" => email, "password" => password}) do
+    User
+    |> Repo.get_by!(email: email)
+    |> User.check_password(password)
+    |> case do
+      false ->
+        {:error, :invalid_credentials}
 
-  ## Examples
-
-      iex> change_user(user)
-      %Ecto.Changeset{data: %User{}}
-
-  """
-  def change_user(%User{} = user, attrs \\ %{}) do
-    User.changeset(user, attrs)
+      user ->
+        {:ok, user}
+    end
+  rescue
+    Ecto.NoResultsError -> {:error, :invalid_credentials}
   end
 end

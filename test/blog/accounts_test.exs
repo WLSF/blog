@@ -13,7 +13,12 @@ defmodule Blog.AccountsTest do
       password: "anythingsecure"
     }
 
-    @invalid_attrs %{}
+    @invalid_attrs %{
+      display_name: "123",
+      email: "wrong_email",
+      image: "",
+      password: "small"
+    }
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
@@ -34,7 +39,10 @@ defmodule Blog.AccountsTest do
 
     test "get_user!/1 returns the user with given id" do
       user = user_fixture()
-      assert %{display_name: name, email: email, image: image} = Accounts.get_user!(user.id)
+
+      assert {:ok, %User{display_name: name, email: email, image: image}} =
+               Accounts.get_user!(user.id)
+
       assert user.display_name == name
       assert user.email == email
       assert user.image == image
@@ -51,12 +59,7 @@ defmodule Blog.AccountsTest do
     test "delete_user/1 deletes the user" do
       user = user_fixture()
       assert {:ok, %User{}} = Accounts.delete_user(user)
-      assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
-    end
-
-    test "change_user/1 returns a user changeset" do
-      user = user_fixture()
-      assert %Ecto.Changeset{} = Accounts.change_user(user)
+      assert {:error, :not_found} = Accounts.get_user!(user.id)
     end
   end
 end

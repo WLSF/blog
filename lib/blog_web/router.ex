@@ -13,9 +13,15 @@ defmodule BlogWeb.Router do
   scope "/api", BlogWeb do
     pipe_through [:api, :authenticated]
 
-    post "/user", UserController, :create
     get "/user", UserController, :index
     get "/user/:id", UserController, :show
-    delete "/user/:id", UserController, :delete
+    delete "/user/me", UserController, :delete
+  end
+
+  scope "/api", BlogWeb do
+    pipe_through :api
+
+    post "/user", UserController, :create
+    post "/login", SessionController, :create
   end
 end
