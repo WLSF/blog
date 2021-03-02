@@ -41,6 +41,7 @@ defmodule Blog.Accounts.User do
     |> cast(attrs, @signup_fields)
   end
 
+  @spec check_password(User.t(), String.t()) :: User.t() | false
   def check_password(user, password) do
     if Argon2.verify_pass(password, user.password_hash) do
       user

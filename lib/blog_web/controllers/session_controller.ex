@@ -8,8 +8,7 @@ defmodule BlogWeb.SessionController do
   action_fallback BlogWeb.FallbackController
 
   def create(conn, params) do
-    with %Ecto.Changeset{valid?: true} <- User.login_changeset(params),
-         {:ok, %User{} = user} <- Accounts.auth_user(params),
+    with {:ok, %User{} = user} <- Accounts.auth_user(params),
          {:ok, token, _} <- Guardian.encode_and_sign(user) do
       conn
       |> put_status(:ok)

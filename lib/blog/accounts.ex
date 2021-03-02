@@ -63,19 +63,16 @@ defmodule Blog.Accounts do
       iex> auth_user(%{email: _, password: _})
       {:ok, %User{}}
   """
-  def auth_user(%{"email" => email, "password" => password}) do
-    User
-    |> Repo.get_by!(email: email)
-    |> User.check_password(password)
+  def auth_user(params) do
+    params
+    |> User.login_changeset()
     |> case do
-      false ->
-        {:error, :invalid_credentials}
+      %Ecto.Changeset{valid?: true} ->
+        do_auth_user(params)
 
-      user ->
-        {:ok, user}
+      e ->
+        {:error, e}
     end
-  rescue
-    Ecto.No.NoResultsError -> {:error, :invalid_credentials}
   end
 
   @doc """
@@ -105,5 +102,20 @@ defmodule Blog.Accounts do
   """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
+  end
+
+  defp do_auth_user(%{"email" => email, "password" => password}) do
+    User
+    |> Repo.get_by!(email: email)
+    |> User.check_password(password)
+    |> case do
+      false ->
+        {:error, :invalid_credentials}
+
+      user ->
+        {:ok, user}
+    end
+  rescue
+    Ecto.No.NoResultsError -> {:error, :invalid_credentials}
   end
 end

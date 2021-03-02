@@ -13,6 +13,8 @@ defmodule BlogWeb.SessionControllerTest do
     password: "anythingsecret"
   }
 
+  @invalid_attrs %{}
+
   setup %{conn: conn} do
     conn = put_req_header(conn, "accept", "application/json")
 
@@ -28,6 +30,15 @@ defmodule BlogWeb.SessionControllerTest do
     test "renders session token when user is valid", %{conn: conn} do
       conn = post(conn, Routes.session_path(conn, :create), @login_attrs)
       assert %{"token" => _} = json_response(conn, 200)["data"]
+    end
+
+    test "renders errors when params are invalid", %{conn: conn} do
+      conn = post(conn, Routes.session_path(conn, :create), @invalid_attrs)
+
+      assert %{
+        "errors" => %{"email" => ["can't be blank"],
+        "password" => ["can't be blank"]}
+      } = json_response(conn, 400)
     end
   end
 end
