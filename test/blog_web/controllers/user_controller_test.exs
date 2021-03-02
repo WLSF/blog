@@ -39,6 +39,20 @@ defmodule BlogWeb.UserControllerTest do
     end
   end
 
+  describe "show user" do
+    setup [:create_user, :auth_user]
+
+    test "renders user by id", %{conn: conn, user: user} do
+      conn = get(conn, Routes.user_path(conn, :show, user.id))
+      assert %{"display_name" => _} = json_response(conn, 200)["data"]
+    end
+
+    test "renders 404 when user doesnt exist", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :show, 1_231_234))
+      assert %{"message" => "Not Found"} = json_response(conn, 404)["errors"]
+    end
+  end
+
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
@@ -62,20 +76,19 @@ defmodule BlogWeb.UserControllerTest do
     setup [:create_user, :auth_user]
 
     test "deletes chosen user", %{conn: conn, user: user} do
-      conn = delete(conn, Routes.user_path(conn, :delete, user))
+      conn = delete(conn, Routes.user_path(conn, :delete))
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, Routes.user_path(conn, :show, user))
-      end
+      conn = get(conn, Routes.user_path(conn, :show, user))
+      assert %{"message" => "Not Found"} = json_response(conn, 404)["errors"]
     end
   end
 
   describe "delete user without auth" do
     setup [:create_user]
 
-    test "renders error", %{conn: conn, user: user} do
-      conn = delete(conn, Routes.user_path(conn, :delete, user))
+    test "renders error", %{conn: conn} do
+      conn = delete(conn, Routes.user_path(conn, :delete))
       assert %{"message" => "unauthenticated"} = json_response(conn, 401)["errors"]
     end
   end

@@ -35,7 +35,11 @@ defmodule Blog.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    {:ok, Repo.get!(User, id)}
+  rescue
+    Ecto.NoResultsError -> {:error, :not_found}
+  end
 
   @doc """
   Creates a user.

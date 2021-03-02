@@ -22,14 +22,15 @@ defmodule BlogWeb.UserController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
-    render(conn, "show.json", user: user)
+    with {:ok, %User{} = user} <- Accounts.get_user!(id) do
+      render(conn, "show.json", user: user)
+    end
   end
 
-  def delete(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
-
-    with {:ok, %User{}} <- Accounts.delete_user(user) do
+  def delete(conn, _params) do
+    with {:ok, %User{} = user} <- Guardian.Plug.current_resource(conn),
+         {:ok, %User{} = user} <- Accounts.get_user!(user.id),
+         {:ok, %User{}} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
   end
