@@ -36,9 +36,15 @@ defmodule BlogWeb.SessionControllerTest do
       conn = post(conn, Routes.session_path(conn, :create), @invalid_attrs)
 
       assert %{
-        "errors" => %{"email" => ["can't be blank"],
-        "password" => ["can't be blank"]}
-      } = json_response(conn, 400)
+               "errors" => %{"email" => ["can't be blank"], "password" => ["can't be blank"]}
+             } = json_response(conn, 400)
+    end
+
+    test "renders errors when user login is invalid", %{conn: conn} do
+      attrs = %{email: "abcd@gmaisl.com", password: "123456"}
+      conn = post(conn, Routes.session_path(conn, :create), attrs)
+
+      assert %{"message" => "invalid credentials"} == json_response(conn, 400)["data"]
     end
   end
 end

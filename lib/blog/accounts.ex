@@ -103,6 +103,6 @@ defmodule Blog.Accounts do
         {:ok, user}
     end
   rescue
-    Ecto.No.NoResultsError -> {:error, :invalid_credentials}
+    Ecto.NoResultsError -> {:error, :invalid_credentials}
   end
 end

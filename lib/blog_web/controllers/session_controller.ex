@@ -13,6 +13,14 @@ defmodule BlogWeb.SessionController do
       conn
       |> put_status(:ok)
       |> render("login.json", token: token)
+    else
+      {:error, :invalid_credentials} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{data: %{message: "invalid credentials"}})
+
+      error ->
+        BlogWeb.FallbackController.call(conn, error)
     end
   end
 end
