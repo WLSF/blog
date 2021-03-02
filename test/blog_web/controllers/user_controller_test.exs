@@ -30,6 +30,15 @@ defmodule BlogWeb.UserControllerTest do
     end
   end
 
+  describe "index without auth" do
+    setup [:create_user]
+
+    test "renders error", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :index))
+      assert %{"message" => "unauthenticated"} = json_response(conn, 401)["errors"]
+    end
+  end
+
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
@@ -59,6 +68,15 @@ defmodule BlogWeb.UserControllerTest do
       assert_error_sent 404, fn ->
         get(conn, Routes.user_path(conn, :show, user))
       end
+    end
+  end
+
+  describe "delete user without auth" do
+    setup [:create_user]
+
+    test "renders error", %{conn: conn, user: user} do
+      conn = delete(conn, Routes.user_path(conn, :delete, user))
+      assert %{"message" => "unauthenticated"} = json_response(conn, 401)["errors"]
     end
   end
 
